@@ -2,6 +2,11 @@ Hi, I'm Han, competing with the name of 0x4lifemen. 👋
 
 Welcome to my Web3 security research journey! This repository serves as a personal log of my experiences in Web3 auditing contests, highlighting key findings, security insights, and lessons learned along the way. My goal is to refine my skills continuously, contribute to the security of decentralized systems, and grow as a Web3 security researcher. 🚀
 
+## 🔗 Profiles
+
+- **Cantina:** [@4lifemen87](https://cantina.xyz/u/4lifemen87)
+- **CodeHawks:** [4lifemen](https://profiles.cyfrin.io/u/4lifemen)
+
 ## 📌 What You'll Find Here
 
 - Detailed breakdowns of past auditing contests
@@ -28,3 +33,7 @@ This repository will be regularly updated as I participate in new contests and e
 | 2024 Oct   | [**Stakelink**](https://codehawks.cyfrin.io/c/2024-09-stakelink)        | Codehawks    |         | 0            | $0            | –         |
 | 2024 Aug   | [**Uniswap V4**](https://cantina.xyz/competitions/e2cf6906-ec8b-4c78-a585-74ac90615659) | Cantina      |         | 0            | $0            | –         |
 | 2024 Aug   | [**Tadle Project**](https://codehawks.cyfrin.io/c/2024-08-tadle)        | Codehawks    |         | 3H, 2L       | $18.37        | 85        |
+
+## 📝 Technical Write-ups
+
+- [How Flash Loans Work on Solana](https://x.com/4lifemen/status/2029190663397621829)
