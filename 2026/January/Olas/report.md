@@ -518,7 +518,7 @@ if (
 ## <a id="m-07"></a>M-07: Incorrect proportional reward splits when an operator has been slashed
 
 1. `StakingBase` contract allows service owners to select a reward distribution type when allocation rewards.
-2. For proportional distribution, the service owner who got slashed still receive equal shares of staking reward.
+2. For proportional distribution, the service owner who go`t slashed still receive equal shares of staking reward.
 3. This distribution is unfair and the protocol can't differentiate between honest operator and operator who got slashed
 
 ```solidity
@@ -542,3 +542,41 @@ enum RewardDistributionType {
 
 1. Whenever there are punitive actions, check what does it affect. Slashing/Banning/Blacklisting
 2. For any staking reward, check if there are any actions that could affect it. Any missing action is a bug
+
+## <a id="m-08">Arbitrum Retryable-ticket refund/value not verified enables Timelock ETH exfiltration
+
+A. Understanding Gnosis Safe wallet flow
+
+1. Safe -> GuardCM(Guard implementation) -> If passes -> Calls Timelock contract
+2. `GuardCM._verifySchedule` function didn't check the ETH value.
+3. This creates an attack path(only if the Safe wallet is compromised and only affecting Arbitrum):
+a. Attacker passed some ETH value in the param
+b. Attacker can set their address as the recipient for Arbitrum retry ticket refund.
+
+```solidity
+(targets[0],, callDatas[0],,,) = abi.decode(
+    payload,
+    (
+        address,
+        uint256, // <@-- @audit ETH value, not checked
+        bytes,
+        bytes32,
+        bytes32,
+        uint256
+    ));
+```
+
+**Fix:**
+
+1. Enforce ETH = 0
+2. Check refund recipient address from Arbitrum's retry
+
+### Assumption
+
+1. Dev assumed validating address, chainId are sufficient. Didn't validate ETH value passed in.
+2. Didn't cover Arbitrum's refund process. Arbitrum refunds excess gas ETH value to recipient address.
+
+### How to spot this
+
+1. Check if all the data is validated. Address, chainId, value, etc..
+2. Understand how bridges validate their calldata
