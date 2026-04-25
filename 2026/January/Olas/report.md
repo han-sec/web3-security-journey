@@ -580,3 +580,26 @@ b. Attacker can set their address as the recipient for Arbitrum retry ticket ref
 
 1. Check if all the data is validated. Address, chainId, value, etc..
 2. Understand how bridges validate their calldata
+
+## <a id="m-09"></a>M-09: Malicious user can prevent buying back OLAS token via Slipstream by transferring token to Slipstream Router
+
+1. Whenever protocol buying back OLAS via Slipstream V3, the swap router's `refundETH()` function refunds any extra ETH to the `msg.sender`.
+2. Issue arise when the `BuyBack` contract doesn't have `receive()` function.
+3. Attacker can transfer small amount of ETH to router, triggering refundETH, and the BuyBack process will fail due to missing `receive()` function.
+
+### Assumption
+
+1. Dev didn't consider this attack path, not having receive function in the BuyBack contract
+
+### Heuristic
+
+1. Whenever any flow involves refund native ETH, check whether the contract has a `receive` function
+2. Checklist:
+
+```
+1. Is the external function payable?         → ETH might flow through
+2. Does the external protocol refund ETH?    → check their router/contract source
+3. Who is msg.sender in that external call?  → that's who receives the refund
+4. Does that msg.sender have receive()?      → if not, revert risk
+5. Is there a sweep/rescue function?         → if not, stuck ETH risk
+```
