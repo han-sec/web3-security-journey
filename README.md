@@ -37,3 +37,7 @@ This repository will be regularly updated as I participate in new contests and e
 ## 📝 Technical Write-ups
 
 - [How Flash Loans Work on Solana](https://x.com/4lifemen/status/2029190663397621829)
+
+## 🛠️ Tools & Skills
+
+- [Trident Fuzz Skill for Claude Code](https://github.com/han-sec/trident-fuzz-skill) — A Claude Code skill that guides invariant-driven stateful fuzz testing for Solana/Anchor programs using Trident v0.12.0
