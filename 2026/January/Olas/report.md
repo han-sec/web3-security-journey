@@ -616,8 +616,26 @@ b. Attacker can set their address as the recipient for Arbitrum retry ticket ref
 
 ## <a id="m-12">M-12: DoS in Liquidity Migration Due to Unit Mismatch in UniswapPriceOracle
 
-1.
+1. A mismatch between price derivation which uses `1e16` but the slippage parameter provided in raw percentage units(`50` for 50%).
+2. In the
+
+```solidity
+// @note in LiquidityManagerETH, when passing in slippage
+if (!IOracle(oracleV2).validatePrice(maxSlippage / 100)) // <@--- raw percentage unit passed in
+{
+    revert SlippageLimitBreached();
+}
+
+// @note in UniswapPriceOracle, unit in 1e16, not 100% points
+uint256 derivation = (tradePrice > timeWeightedAverage)
+    ? ((tradePrice - timeWeightedAverage) * 1e16) / timeWeightedAverage
+    : ((timeWeightedAverage - tradePrice) * 1e16) / timeWeightedAverage;
+```
 
 ### Assumption
 
+1. Dev assumed everything operate in the correct decimals
+
 ### Heuristic
+
+1. Ensuring all the calculation operates in the same decimals.
