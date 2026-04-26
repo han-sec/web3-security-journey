@@ -21,11 +21,11 @@
 
 ## Results Summary
 
-| Severity | Count |
-|----------|-------|
-| High | 0 |
-| Medium | 0 |
-| Low | 0 |
+| Severity | Total | Found by Me |
+|----------|-------|-------------|
+| High     | 11    | 0           |
+| Medium   | 10    | 1           |
+| Low      | 0     | 0           |
 
 ---
 
@@ -33,11 +33,41 @@
 
 ### My Findings
 
-_No findings yet._
+| ID | Title | Severity |
+|----|-------|----------|
+| [M-11](#m-11) | Price Cumulative Last Is Used Inverted in Uniswap Oracle | Medium |
 
 ### Findings I Missed
 
-H-01 Explained: Variable Overwrite Makes Deviation Check Useless
+#### High
+
+| ID | Title |
+|----|-------|
+| [H-01](#h-01) | Variable Overwrite Makes Deviation Check Useless |
+| [H-02](#h-02) | Incorrect TWAP Calculation in `BalancerPriceOracle` Allows Price Manipulation |
+| [H-03](#h-03) | Insolvency via Cross-Service Reentrancy in `StakingBase._withdraw` |
+| [H-04](#h-04) | Missing Maximum Bond Signature Parameter |
+| [H-05](#h-05) | Service Owner Can Steal Protocol Tokens by Exploiting Reentrancy in `create()` |
+| [H-06](#h-06) | Token Callback Reentrancy |
+| [H-08](#h-08) | Balancer Oracle Uses Vault Balances as Price and Can Be Steered by Anyone |
+| [H-09](#h-09) | Critical Logic Inversion in Price Guard Allows Flash-Loan Manipulation of Liquidity Operations |
+| [H-10](#h-10) | Balancer Oracle Update Can Mutate State Even When It Returns False |
+| [H-11](#h-11) | Broken TWAP Validation Allows Spot-Price Manipulation and Renders Slippage Checks Ineffective |
+| [H-12](#h-12) | Missing Deadline Parameter in Register Signatures |
+
+#### Medium
+
+| ID | Title |
+|----|-------|
+| [M-01](#m-01) | Uniswap Oracle `validatePrice` Can Be Griefed Per Block via `sync()` |
+| [M-02](#m-02) | `changeRanges` Silently Fails When Price Is Out of Tick Range |
+| [M-04](#m-04) | `checkpoint()` Does Not Correct `effectiveBond` Downward at Year Boundaries Where Inflation Decreases |
+| [M-05](#m-05) | Services Can Earn Undeserved Rewards by Manipulating Checkpoint Timing During Reward Droughts |
+| [M-06](#m-06) | `BalancerPriceOracle::validatePrice` Uses Stale TWAP |
+| [M-07](#m-07) | Incorrect Proportional Reward Splits When an Operator Has Been Slashed |
+| [M-08](#m-08) | Arbitrum Retryable-Ticket Refund/Value Not Verified Enables Timelock ETH Exfiltration |
+| [M-09](#m-09) | Malicious User Can Prevent Buying Back OLAS Token via Slipstream by Transferring Token to Slipstream Router |
+| [M-12](#m-12) | DoS in Liquidity Migration Due to Unit Mismatch in `UniswapPriceOracle` |
 
 ---
 
@@ -45,7 +75,28 @@ H-01 Explained: Variable Overwrite Makes Deviation Check Useless
 
 ---
 
-_Findings will be added here._
+## <a id="m-11"></a>M-11: Price Cumulative Last Is Used Inverted in Uniswap Oracle
+
+1. The price oracle retrieves the token price from Uniswap pool based on swap direction.
+2. The price call is inverted. When `direction = 0`, it should call `price0cumulativeLast()`.
+
+```solidity
+// @note both prices were swapped
+if (direction == 0) {
+    cumulativePriceLast = IUniswapV2(pair).price1CumulativeLast();
+} else {
+    cumulativePriceLast = IUniswapV2(pair).price0CumulativeLast();
+}
+```
+
+### Assumption
+
+1. Dev didn't consider what the function fetches, and inverted both of the query.
+2. A simple test would catch this, but no test was implemented.
+
+### Heuristic
+
+1. Ensure price fetching is always correct.
 
 ---
 
@@ -55,7 +106,7 @@ _Findings will be added here._
 
 ## High
 
-## H-01 Explained: Variable Overwrite Makes Deviation Check Useless
+## <a id="h-01"></a>H-01: Variable Overwrite Makes Deviation Check Useless
 
 ### Summary
 
@@ -92,7 +143,7 @@ _Findings will be added here._
 
 ---
 
-## H-02: Incorrect TWAP Calculation in `BalancerPriceOracle` Allows Price Manipulation
+## <a id="h-02"></a>H-02: Incorrect TWAP Calculation in `BalancerPriceOracle` Allows Price Manipulation
 
 Two issues in BalancerPriceOracle implementation
 
@@ -130,7 +181,7 @@ uint256 averagePrice = (snapshot.cumulativePrice +
 
 ---
 
-### H-03: Insolvency via Cross-Service Reentrancy in StakingBase._withdraw
+## <a id="h-03"></a>H-03: Insolvency via Cross-Service Reentrancy in StakingBase._withdraw
 
 1. The `unstake()` => `_withdraw` function in `StakingBase.sol` violates the Checks-Effects-Interactions (CEI) pattern, allows for reentrancy
 2. The function did delete the `serviceId` claimed, but an owner can use a different service ID to reenter back into the contract.
@@ -150,7 +201,7 @@ uint256 averagePrice = (snapshot.cumulativePrice +
 
 ---
 
-## H-04: Missing Maximum Bond Signature Parameter
+## <a id="h-04"></a>H-04: Missing Maximum Bond Signature Parameter
 
 ### Summary
 
@@ -172,7 +223,7 @@ uint256 averagePrice = (snapshot.cumulativePrice +
 
 ---
 
-## H-05: Service Owner Can Steal Protocol Tokens by Exploiting Reentrancy in `create()`
+## <a id="h-05"></a>H-05: Service Owner Can Steal Protocol Tokens by Exploiting Reentrancy in `create()`
 
 ### Summary
 
@@ -249,13 +300,13 @@ ServiceManager.create(serviceOwner=attacker, token=USDC, bond=100 USDC)
 
 ---
 
-## H-06: Token Callback Reentrancy
+## <a id="h-06"></a>H-06: Token Callback Reentrancy
 
 ### Summary
 
 Similar to H-03
 
-## H-08: H-08: Balancer Oracle Uses Vault Balances as Price and Can Be Steered by Anyone
+## <a id="h-08"></a>H-08: Balancer Oracle Uses Vault Balances as Price and Can Be Steered by Anyone
 
 ### Summary
 
@@ -286,7 +337,7 @@ function getPrice() public view returns (uint256) {
 
 1. Beware of any Oracle which doesn't use TWAP.
 
-## H-09: Critical Logic Inversion in Price Guard Allows Flash-Loan Manipulation of Liquidity Operations
+## <a id="h-09"></a>H-09: Critical Logic Inversion in Price Guard Allows Flash-Loan Manipulation of Liquidity Operations
 
 ### Summary
 
@@ -315,7 +366,7 @@ if (oldestTimestamp + SECONDS_AGO < block.timestamp) {
 
 ---
 
-## H-10: Balancer Oracle Update Can Mutate State Even When It Returns False
+## <a id="h-10"></a>H-10: Balancer Oracle Update Can Mutate State Even When It Returns False
 
 ### Summary
 
@@ -355,7 +406,7 @@ if (
 
 1. Change for any state changes before function returns. For any failure that supposed to REVERT but didn't.
 
-## H-11: Broken TWAP Validation Allows Spot-Price Manipulation and Renders Slippage Checks Ineffective
+## <a id="h-11"></a>H-11: Broken TWAP Validation Allows Spot-Price Manipulation and Renders Slippage Checks Ineffective
 
 1. `UniswapPriceOracle` tautology, `deviation = |spotPrice - spotPrice| = 0`, hence always using the spot price.
 
@@ -390,7 +441,7 @@ TWAP = (new_price - oldPrice) / (currentTime - oldPriceTime)
 
 Pay attention to any deviation from this formula
 
-## H-12: Missing Deadline Parameter in Register Signatures
+## <a id="h-12"></a>H-12: Missing Deadline Parameter in Register Signatures
 
 ### Summary
 
@@ -411,7 +462,7 @@ Pay attention to any deviation from this formula
 
 ## MEDIUM
 
-## M-01: Uniswap Oracle validatePrice Can Be Griefed Per Block via sync()
+## <a id="m-01"></a>M-01: Uniswap Oracle validatePrice Can Be Griefed Per Block via sync()
 
 ### Summary
 
@@ -432,7 +483,7 @@ blockTimestampLast = uint32(block.timestamp);
 
 1. Understand uniswap V2 has this [`sync()`](https://github.com/Jeiwan/zuniswapv2/blob/50fb69e95805970e9f0f118fc797b0a02f74f43e/src/ZuniswapV2Pair.sol#L179) feature, which can be used to update price and the timestamp.
 
-## M-02: changeRanges Silently Fails When Price Is Out of Tick Range
+## <a id="m-02"></a>M-02: changeRanges Silently Fails When Price Is Out of Tick Range
 
 ### Summary
 
@@ -449,7 +500,7 @@ blockTimestampLast = uint32(block.timestamp);
 
 1. Consider that every path is handled properly. What has changed in a path, and what hasn't been changed.
 
-## M-04: checkpoint() Does Not Correct effectiveBond Downward at Year Boundaries Where Inflation Decreases
+## <a id="m-04"></a>M-04: checkpoint() Does Not Correct effectiveBond Downward at Year Boundaries Where Inflation Decreases
 
 ### Summary
 
@@ -476,7 +527,7 @@ inflationPerEpoch = curInflationPerSecond * diffNumSeconds
 
 1. For any function with only `if` condition, ask what happens when ELSE is true, is it okay to ignore.
 
-## M-05: Services Can Earn Undeserved Rewards by Manipulating Checkpoint Timing During Reward Droughts
+## <a id="m-05"></a>M-05: Services Can Earn Undeserved Rewards by Manipulating Checkpoint Timing During Reward Droughts
 
 1. Context- service owner activities tracking, via service Info nonce increases.
 2. the reward eligible check is `activity / timeElapsed`.
@@ -604,17 +655,7 @@ b. Attacker can set their address as the recipient for Arbitrum retry ticket ref
 5. Is there a sweep/rescue function?         → if not, stuck ETH risk
 ```
 
-## <a id="m-11"></a>M-11: Price Cumulative Last Is Used Inverted in Uniswap Oracle (Reported)
-
-1.
-
-### Assumption
-
-### Heuristic
-
-1.
-
-## <a id="m-12">M-12: DoS in Liquidity Migration Due to Unit Mismatch in UniswapPriceOracle
+## <a id="m-12"></a>M-12: DoS in Liquidity Migration Due to Unit Mismatch in UniswapPriceOracle
 
 1. A mismatch between price derivation which uses `1e16` but the slippage parameter provided in raw percentage units(`50` for 50%).
 2. In the
