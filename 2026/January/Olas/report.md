@@ -603,3 +603,21 @@ b. Attacker can set their address as the recipient for Arbitrum retry ticket ref
 4. Does that msg.sender have receive()?      → if not, revert risk
 5. Is there a sweep/rescue function?         → if not, stuck ETH risk
 ```
+
+## <a id="m-11"></a>M-11: Price Cumulative Last Is Used Inverted in Uniswap Oracle (Reported)
+
+1.
+
+### Assumption
+
+### Heuristic
+
+1.
+
+## <a id="m-12">M-12: DoS in Liquidity Migration Due to Unit Mismatch in UniswapPriceOracle
+
+1.
+
+### Assumption
+
+### Heuristic
